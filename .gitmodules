@@ -1,0 +1,3 @@
+[submodule "SteinerTree-PACE-2018-instances"]
+	path = SteinerTree-PACE-2018-instances
+	url = https://github.com/PACE-challenge/SteinerTree-PACE-2018-instances
