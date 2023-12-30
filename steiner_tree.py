@@ -27,25 +27,32 @@ for k in S:
             volume = 1
         elif i == k:
             volume = -1
-        stp.addConstr(x.sum(k, i,'*') - x.sum(k,'*', i) == volume, name="flow_conversation")
+        stp.addConstr(x.sum(k, i,'*') - x.sum(k,'*', i) == volume, name=f"flow_conversation[{k},{i}]")
 stp.addConstrs((x[k, i, j] <= y[i, j] for i, j in arcs for k in S), name="choose_edge")
 
 stp.setAttr("ModelSense", GRB.MINIMIZE)
-stp.optimize()
-stp.write("stp.lp")
-variable_names = [var.VarName for var in stp.getVars()]
-flows = {s:[] for s in S}
-for v in stp.getVars():
-    if (v.X > 0):
-        matches = re.findall(r'\d+', v.VarName)
-        if len(matches) == 3:
-            k, i, j = (int(match) for match in matches)
-            flows[k].append((i,j))
-        else:
-            print(v.VarName)
-print(flows)
-pos = nx.kamada_kawai_layout(g)
-nx.set_node_attributes(g, pos, 'pos')
-nx.set_edge_attributes(g, weights, "cost")
-nx.draw(g, pos=pos, with_labels=True)
-plt.show()
+stp.update()
+relaxed_stp:gp.Model = stp.copy()
+relaxed_stp = relaxed_stp.relax()
+relaxed_stp.optimize()
+relaxed_stp.write("stp.lp")
+
+# flows = {s:[] for s in S}
+# for v in relaxed_stp.getVars():
+#     print(v.VarName, v.X)
+    # if (v.X > 0):
+    #     matches = re.findall(r'\d+', v.VarName)
+    #     if len(matches) == 3:
+    #         k, i, j = (int(match) for match in matches)
+    #         flows[k].append((i,j))
+    #     else:
+    #         print(v.VarName)
+# print(flows)
+# shadow_price = relaxed_stp.getAttr(GRB.Attr.Pi)
+one = relaxed_stp.getConstrByName("flow_conversation[4,1]")
+print(one)
+# pos = nx.kamada_kawai_layout(g)
+# nx.set_node_attributes(g, pos, 'pos')
+# nx.set_edge_attributes(g, weights, "cost")
+# nx.draw(g, pos=pos, with_labels=True)
+# plt.show()
