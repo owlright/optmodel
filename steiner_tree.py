@@ -32,8 +32,9 @@ stp.addConstrs((x[k, i, j] <= y[i, j] for i, j in arcs for k in S), name="choose
 
 stp.setAttr("ModelSense", GRB.MINIMIZE)
 stp.update()
-relaxed_stp:gp.Model = stp.copy()
+relaxed_stp = stp.copy()
 relaxed_stp = relaxed_stp.relax()
+relaxed_stp.setParam("NetworkAlg", 1)
 relaxed_stp.optimize()
 relaxed_stp.write("stp.lp")
 
